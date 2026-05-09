@@ -25,7 +25,7 @@ describe('configureApp', () => {
 
     configureApp(app as never);
 
-    expect(app.setGlobalPrefix).toHaveBeenCalledWith('api');
+    expect(app.setGlobalPrefix).not.toHaveBeenCalled();
     expect(app.useGlobalPipes).toHaveBeenCalledTimes(1);
     expect(app.useGlobalPipes.mock.calls[0]?.[0]).toBeInstanceOf(
       ValidationPipe,

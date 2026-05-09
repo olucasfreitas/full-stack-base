@@ -100,7 +100,8 @@ See `web/.env.example`:
 
 - `VITE_API_BASE_URL`
 
-The frontend defaults to a relative `/api` base path and Vite proxies that path to the Nest API in development.
+The Nest API serves bare routes like `/health` and `/items`.
+The frontend defaults to a relative `/api` base path in development, and Vite rewrites that proxy path to the bare Nest routes so it does not clash with the app's own `/items` route.
 TanStack Router owns client-side navigation under `web/src/routes`, and TanStack Query owns server-state loading and mutations.
 
 ## Scripts
@@ -119,13 +120,13 @@ From the repository root:
 
 ## API routes
 
-- `GET /api/health`
-- `GET /api/items`
-- `GET /api/items/:id`
-- `POST /api/items`
-- `PUT /api/items/:id`
-- `PATCH /api/items/:id`
-- `DELETE /api/items/:id`
+- `GET /health`
+- `GET /items`
+- `GET /items/:id`
+- `POST /items`
+- `PUT /items/:id`
+- `PATCH /items/:id`
+- `DELETE /items/:id`
 
 Validation errors use Nest's standard `400` response shape, including a `message`
 array when multiple constraints fail.
@@ -135,11 +136,11 @@ array when multiple constraints fail.
 - `/` redirects to `/items`
 - `/items` preloads the collection through a route loader backed by TanStack Query
 - `/items/:id` preloads the selected record through a typed detail route loader
-- the create form sends `POST /api/items`
-- selecting a task loads `GET /api/items/:id`
-- single-field edits send `PATCH /api/items/:id`
-- full-task saves send `PUT /api/items/:id`
-- deleting a task sends `DELETE /api/items/:id` and returns to `/items`
+- the create form sends `POST /items`
+- selecting a task loads `GET /items/:id`
+- one changed field saves with `PATCH /items/:id`
+- multiple changed fields save with `PUT /items/:id`
+- deleting a task sends `DELETE /items/:id` and returns to `/items`
 
 ## Database workflow
 

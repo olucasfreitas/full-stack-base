@@ -17,9 +17,8 @@ function ItemRoutePending() {
       values={emptyItemDraft}
       busy={false}
       isLoading={true}
+      saveDisabled={true}
       onChange={noopDraftChange}
-      onSaveTitle={noop}
-      onSaveDescription={noop}
       onSubmit={noop}
       onReset={noop}
       onDelete={noop}

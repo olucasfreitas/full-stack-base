@@ -22,6 +22,24 @@ type ItemDetailPageProps = {
   itemId: string
 }
 
+function getItemChanges(savedDraft: ItemDraft, nextDraft: ItemDraft) {
+  const changes: Partial<ItemDraft> = {}
+
+  if (savedDraft.title !== nextDraft.title) {
+    changes.title = nextDraft.title
+  }
+
+  if (savedDraft.description !== nextDraft.description) {
+    changes.description = nextDraft.description
+  }
+
+  if (savedDraft.completed !== nextDraft.completed) {
+    changes.completed = nextDraft.completed
+  }
+
+  return changes
+}
+
 export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -30,51 +48,32 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const [editDraft, setEditDraft] = useState<ItemDraft>(() => toItemDraft(item))
 
   const parsedItemId = parseItemId(itemId)
+  const savedDraft = toItemDraft(item)
+  const pendingChanges = getItemChanges(savedDraft, editDraft)
+  const hasChanges = Object.keys(pendingChanges).length > 0
 
-  function updateTaskCaches(updatedItem: Awaited<ReturnType<typeof replaceItem>>) {
+  function updateTaskCaches(updatedItem: Item) {
     queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
     queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
       upsertItemInList(currentItems, updatedItem),
     )
   }
 
-  const replaceMutation = useMutation({
-    mutationFn: (payload: ItemDraft) => replaceItem(parsedItemId, payload),
+  const saveMutation = useMutation({
+    mutationFn: (payload: ItemDraft) => {
+      const changes = getItemChanges(savedDraft, payload)
+
+      if (Object.keys(changes).length === 1) {
+        return patchItem(parsedItemId, changes)
+      }
+
+      return replaceItem(parsedItemId, payload)
+    },
     onSuccess: (updatedItem) => {
       setEditDraft(toItemDraft(updatedItem))
       updateTaskCaches(updatedItem)
       showToast({
-        message: `Saved all changes to "${updatedItem.title}".`,
-      })
-    },
-  })
-
-  const patchTitleMutation = useMutation({
-    mutationFn: (title: string) => patchItem(parsedItemId, { title }),
-    onSuccess: (updatedItem) => {
-      updateTaskCaches(updatedItem)
-      setEditDraft((currentDraft) => ({
-        ...currentDraft,
-        title: updatedItem.title,
-      }))
-
-      showToast({
-        message: 'Updated the task title.',
-      })
-    },
-  })
-
-  const patchDescriptionMutation = useMutation({
-    mutationFn: (description: string) => patchItem(parsedItemId, { description }),
-    onSuccess: (updatedItem) => {
-      updateTaskCaches(updatedItem)
-      setEditDraft((currentDraft) => ({
-        ...currentDraft,
-        description: updatedItem.description ?? '',
-      }))
-
-      showToast({
-        message: 'Updated the task description.',
+        message: `Saved "${updatedItem.title}".`,
       })
     },
   })
@@ -96,20 +95,12 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
     },
   })
 
-  const isSubmitting =
-    replaceMutation.isPending ||
-    patchTitleMutation.isPending ||
-    patchDescriptionMutation.isPending ||
-    deleteMutation.isPending
-  const errorMessage = replaceMutation.error
-    ? getErrorMessage(replaceMutation.error)
-    : patchTitleMutation.error
-      ? getErrorMessage(patchTitleMutation.error)
-      : patchDescriptionMutation.error
-        ? getErrorMessage(patchDescriptionMutation.error)
-      : deleteMutation.error
-        ? getErrorMessage(deleteMutation.error)
-        : null
+  const isSubmitting = saveMutation.isPending || deleteMutation.isPending
+  const errorMessage = saveMutation.error
+    ? getErrorMessage(saveMutation.error)
+    : deleteMutation.error
+      ? getErrorMessage(deleteMutation.error)
+      : null
 
   return (
     <ItemDetailPanel
@@ -118,18 +109,17 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       busy={isSubmitting}
       isLoading={false}
       errorMessage={errorMessage}
+      saveDisabled={!hasChanges}
       onChange={setEditDraft}
-      onSaveTitle={() => {
-        patchTitleMutation.mutate(editDraft.title)
-      }}
-      onSaveDescription={() => {
-        patchDescriptionMutation.mutate(editDraft.description)
-      }}
       onSubmit={() => {
-        replaceMutation.mutate(editDraft)
+        if (!hasChanges) {
+          return
+        }
+
+        saveMutation.mutate(editDraft)
       }}
       onReset={() => {
-        setEditDraft(toItemDraft(item))
+        setEditDraft(savedDraft)
       }}
       onDelete={() => {
         deleteMutation.mutate()

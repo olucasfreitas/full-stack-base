@@ -102,7 +102,6 @@ export function ItemsLayoutPage() {
           }
           onSelect={(nextItemId) => {
             if (selectedItemId === nextItemId) {
-              void navigate({ to: '/items' })
               return
             }
 

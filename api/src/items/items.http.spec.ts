@@ -116,7 +116,7 @@ describe('Items HTTP', () => {
 
   it('supports full CRUD over HTTP', async () => {
     const createResponse = await request(app.getHttpServer())
-      .post('/api/items')
+      .post('/items')
       .send({
         title: 'Ship starter',
         description: 'Wire web and api together.',
@@ -132,7 +132,7 @@ describe('Items HTTP', () => {
     });
 
     await request(app.getHttpServer())
-      .get('/api/items')
+      .get('/items')
       .expect(200)
       .expect(({ body }) => {
         expect(body).toHaveLength(1);
@@ -140,7 +140,7 @@ describe('Items HTTP', () => {
       });
 
     await request(app.getHttpServer())
-      .get('/api/items/1')
+      .get('/items/1')
       .expect(200)
       .expect(({ body }) => {
         expect(body.id).toBe(1);
@@ -148,7 +148,7 @@ describe('Items HTTP', () => {
       });
 
     await request(app.getHttpServer())
-      .put('/api/items/1')
+      .put('/items/1')
       .send({
         title: 'Ship polished starter',
         description: 'Replace the whole record.',
@@ -161,21 +161,21 @@ describe('Items HTTP', () => {
       });
 
     await request(app.getHttpServer())
-      .patch('/api/items/1')
+      .patch('/items/1')
       .send({ completed: false })
       .expect(200)
       .expect(({ body }) => {
         expect(body.completed).toBe(false);
       });
 
-    await request(app.getHttpServer()).delete('/api/items/1').expect(204);
+    await request(app.getHttpServer()).delete('/items/1').expect(204);
 
-    await request(app.getHttpServer()).get('/api/items/1').expect(404);
+    await request(app.getHttpServer()).get('/items/1').expect(404);
   });
 
   it('returns the standard validation message array for an empty title', async () => {
     await request(app.getHttpServer())
-      .post('/api/items')
+      .post('/items')
       .send({
         title: '   ',
       })

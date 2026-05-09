@@ -8,7 +8,6 @@ export function configureApp(app: INestApplication) {
   const configService = app.get<ConfigService<Env, true>>(ConfigService);
   const corsOrigin = configService.getOrThrow('CORS_ORIGIN', { infer: true });
 
-  app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -105,12 +105,50 @@ describe('App routing', () => {
     fireEvent.change(within(editor).getByLabelText(/task title/i), {
       target: { value: 'Pay utilities' },
     })
-    fireEvent.click(within(editor).getByRole('button', { name: /save title/i }))
+    fireEvent.click(within(editor).getByRole('button', { name: /save changes/i }))
 
     await waitFor(() => {
       expect(patchItem).toHaveBeenCalledWith(1, { title: 'Pay utilities' })
     })
     expect(replaceItem).not.toHaveBeenCalled()
+  })
+
+  it('keeps the selected task editor open when the same task is clicked again', async () => {
+    vi.mocked(listItems).mockResolvedValue([baseItem])
+
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+
+    const router = createAppRouter({
+      history: createMemoryHistory({
+        initialEntries: ['/items/1'],
+      }),
+      queryClient,
+    })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    )
+
+    expect(
+      await screen.findByRole('region', { name: /edit task/i }),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /pay rent/i }))
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/items/1')
+    })
+
+    expect(
+      screen.getByRole('region', { name: /edit task/i }),
+    ).toBeInTheDocument()
   })
 
   it('uses PUT when the full task form is submitted', async () => {
@@ -146,7 +184,7 @@ describe('App routing', () => {
     })
     fireEvent.click(within(editor).getByLabelText(/mark task as completed/i))
     fireEvent.click(
-      within(editor).getByRole('button', { name: /save all changes/i }),
+      within(editor).getByRole('button', { name: /save changes/i }),
     )
 
     await waitFor(() => {
