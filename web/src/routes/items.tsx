@@ -30,6 +30,7 @@ function ItemsRoutePending() {
           isLoading={true}
           onToggleCompletion={noop}
           onSelect={noop}
+          onDelete={noop}
         />
       }
       detailPanel={null}

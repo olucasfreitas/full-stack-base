@@ -7,12 +7,13 @@ import { useToast } from '@app/use-toast'
 import { ItemCollectionPanel } from '@components/organisms/items/item-collection-panel'
 import { ItemCreatePanel } from '@components/organisms/items/item-create-panel'
 import { ItemsPageTemplate } from '@components/templates/items/items-page-template'
-import { createItem, patchItem } from '@entities/item/api'
+import { createItem, patchItem, removeItem } from '@entities/item/api'
 import { emptyItemDraft } from '@entities/item/draft'
 import {
   itemDetailQueryKey,
   itemsListQueryKey,
   itemsListQueryOptions,
+  removeItemFromList,
   upsertItemInList,
 } from '@entities/item/queries'
 import type { Item, ItemDraft } from '@entities/item/types'
@@ -67,11 +68,31 @@ export function ItemsLayoutPage() {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => removeItem(id),
+    onSuccess: (_result, deletedId) => {
+      queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+        removeItemFromList(currentItems, deletedId),
+      )
+      queryClient.removeQueries({
+        queryKey: itemDetailQueryKey(String(deletedId)),
+      })
+
+      if (selectedItemId === deletedId) {
+        void navigate({ to: '/items' })
+      }
+
+      showToast({ message: 'Deleted the task.' })
+    },
+  })
+
   const errorMessage = createMutation.error
     ? getErrorMessage(createMutation.error)
     : toggleCompletionMutation.error
       ? getErrorMessage(toggleCompletionMutation.error)
-      : null
+      : deleteMutation.error
+        ? getErrorMessage(deleteMutation.error)
+        : null
 
   return (
     <ItemsPageTemplate
@@ -113,6 +134,9 @@ export function ItemsLayoutPage() {
               id: item.id,
               completed: !item.completed,
             })
+          }}
+          onDelete={(item) => {
+            deleteMutation.mutate(item.id)
           }}
         />
       }

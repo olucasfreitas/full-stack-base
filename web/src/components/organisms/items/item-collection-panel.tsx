@@ -8,6 +8,7 @@ type ItemCollectionPanelProps = {
   busyItemId?: number | null
   onSelect: (id: number) => void
   onToggleCompletion: (item: Item) => void
+  onDelete: (item: Item) => void
 }
 
 export function ItemCollectionPanel({
@@ -17,6 +18,7 @@ export function ItemCollectionPanel({
   busyItemId = null,
   onSelect,
   onToggleCompletion,
+  onDelete,
 }: ItemCollectionPanelProps) {
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
@@ -43,6 +45,7 @@ export function ItemCollectionPanel({
               busy={busyItemId === item.id}
               onSelect={onSelect}
               onToggleCompletion={onToggleCompletion}
+              onDelete={onDelete}
             />
           ))
         )}

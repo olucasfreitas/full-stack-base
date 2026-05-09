@@ -145,7 +145,7 @@ describe('App routing', () => {
       await screen.findByRole('region', { name: /edit task/i }),
     ).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /pay rent/i }))
+    fireEvent.click(screen.getByText('Pay rent'))
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe('/items/1')
