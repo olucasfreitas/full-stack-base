@@ -3,7 +3,10 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/full-stack-base",
-  "forwardPorts": [5173, 3000],
+  "forwardPorts": [
+    5173,
+    3000
+  ],
   "portsAttributes": {
     "5173": {
       "label": "web",
@@ -11,7 +14,7 @@
     },
     "3000": {
       "label": "api",
-      "onAutoForward": "notify"
+      "onAutoForward": "openBrowser"
     }
   },
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
