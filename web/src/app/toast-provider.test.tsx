@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import { ToastProvider } from './toast-provider'
-import { useToast } from './use-toast'
+import { useToast } from '@hooks/use-toast'
 
 function ToastHarness() {
   const { showToast } = useToast()

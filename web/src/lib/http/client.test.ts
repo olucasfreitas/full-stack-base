@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ApiError, apiClient, requestJson } from './client'
-import { getErrorMessage } from './get-error-message'
+import { getErrorMessage } from './errors'
 
 describe('requestJson', () => {
   it('exports the shared ky client used by the API layer', () => {

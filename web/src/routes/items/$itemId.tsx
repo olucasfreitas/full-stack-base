@@ -1,10 +1,23 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { useState } from 'react'
 
-import { ItemDetailPanel } from '@components/organisms/items/item-detail-panel'
-import { emptyItemDraft } from '@entities/item/draft'
-import { itemDetailQueryOptions } from '@entities/item/queries'
-import { ItemDetailPage } from '@pages/items/item-detail-page'
-import { ApiError } from '@shared/api/client'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
+
+import { useToast } from '@hooks/use-toast'
+import { patchItem, removeItem, replaceItem } from '@items/api'
+import { ItemDetailPanel } from '@items/components/item-detail-panel'
+import { emptyItemDraft, toItemDraft } from '@items/draft'
+import {
+  itemDetailQueryKey,
+  itemDetailQueryOptions,
+  itemsListQueryKey,
+  parseItemId,
+  removeItemFromList,
+  upsertItemInList,
+} from '@items/queries'
+import type { Item, ItemDraft } from '@items/types'
+import { ApiError } from '@lib/http/client'
+import { getErrorMessage } from '@lib/http/errors'
 
 function noop() {}
 
@@ -43,6 +56,112 @@ function ItemRouteNotFound() {
         The selected task does not exist anymore. Choose another task from the list.
       </p>
     </section>
+  )
+}
+
+function getItemChanges(savedDraft: ItemDraft, nextDraft: ItemDraft) {
+  const changes: Partial<ItemDraft> = {}
+
+  if (savedDraft.title !== nextDraft.title) {
+    changes.title = nextDraft.title
+  }
+
+  if (savedDraft.description !== nextDraft.description) {
+    changes.description = nextDraft.description
+  }
+
+  if (savedDraft.completed !== nextDraft.completed) {
+    changes.completed = nextDraft.completed
+  }
+
+  return changes
+}
+
+function ItemDetailPage({ itemId }: { itemId: string }) {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { showToast } = useToast()
+  const { data: item } = useSuspenseQuery(itemDetailQueryOptions(itemId))
+  const [editDraft, setEditDraft] = useState<ItemDraft>(() => toItemDraft(item))
+
+  const parsedItemId = parseItemId(itemId)
+  const savedDraft = toItemDraft(item)
+  const hasChanges = Object.keys(getItemChanges(savedDraft, editDraft)).length > 0
+
+  function updateTaskCaches(updatedItem: Item) {
+    queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
+    queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+      upsertItemInList(currentItems, updatedItem),
+    )
+  }
+
+  const saveMutation = useMutation({
+    mutationFn: (payload: ItemDraft) => {
+      const changes = getItemChanges(savedDraft, payload)
+
+      if (Object.keys(changes).length === 1) {
+        return patchItem(parsedItemId, changes)
+      }
+
+      return replaceItem(parsedItemId, payload)
+    },
+    onSuccess: async (updatedItem) => {
+      updateTaskCaches(updatedItem)
+      await navigate({ to: '/items' })
+
+      showToast({
+        message: `Saved "${updatedItem.title}".`,
+      })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => removeItem(parsedItemId),
+    onSuccess: async () => {
+      queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+        removeItemFromList(currentItems, parsedItemId),
+      )
+      queryClient.removeQueries({
+        queryKey: itemDetailQueryKey(itemId),
+      })
+      await navigate({ to: '/items' })
+
+      showToast({
+        message: 'Deleted the task.',
+      })
+    },
+  })
+
+  const isSubmitting = saveMutation.isPending || deleteMutation.isPending
+  const errorMessage = saveMutation.error
+    ? getErrorMessage(saveMutation.error)
+    : deleteMutation.error
+      ? getErrorMessage(deleteMutation.error)
+      : null
+
+  return (
+    <ItemDetailPanel
+      item={item}
+      values={editDraft}
+      busy={isSubmitting}
+      isLoading={false}
+      errorMessage={errorMessage}
+      saveDisabled={!hasChanges}
+      onChange={setEditDraft}
+      onSubmit={() => {
+        if (!hasChanges) {
+          return
+        }
+
+        saveMutation.mutate(editDraft)
+      }}
+      onReset={() => {
+        setEditDraft(savedDraft)
+      }}
+      onDelete={() => {
+        deleteMutation.mutate()
+      }}
+    />
   )
 }
 

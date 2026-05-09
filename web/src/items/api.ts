@@ -1,4 +1,5 @@
-import { requestJson } from '@shared/api/client'
+import { requestJson } from '@lib/http/client'
+
 import type { CreateItemInput, Item, PatchItemInput, ReplaceItemInput } from './types'
 
 export async function listItems() {

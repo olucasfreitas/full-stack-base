@@ -1,4 +1,4 @@
-import type { ItemDraft } from '@entities/item/types'
+import type { ItemDraft } from '@items/types'
 
 type ItemFormProps = {
   idPrefix: string

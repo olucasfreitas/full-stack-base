@@ -1,6 +1,6 @@
-import { Panel } from '@components/atoms/layout/panel'
-import { ItemForm } from '@components/molecules/items/item-form'
-import type { ItemDraft } from '@entities/item/types'
+import { ItemForm } from '@items/components/item-form'
+import type { ItemDraft } from '@items/types'
+import { Panel } from '@lib/ui/panel'
 
 type ItemCreatePanelProps = {
   values: ItemDraft

@@ -18,21 +18,9 @@ const apiBaseUrl = (() => {
   return normalizedValue
 })()
 
-type ApiErrorBody = {
-  message?: string | string[]
-}
+import { ApiError } from './errors'
 
-export class ApiError extends Error {
-  response: Response
-  body: ApiErrorBody | null
-
-  constructor(response: Response, body: ApiErrorBody | null, cause?: unknown) {
-    super(`${response.status} ${response.statusText}`, { cause })
-    this.name = 'ApiError'
-    this.response = response
-    this.body = body
-  }
-}
+export { ApiError }
 
 export const apiClient = ky.create({
   baseUrl: apiBaseUrl,
@@ -42,6 +30,10 @@ export const apiClient = ky.create({
     Accept: 'application/json',
   },
 })
+
+type ApiErrorBody = {
+  message?: string | string[]
+}
 
 async function parseJsonBody(response: Response) {
   const responseClone = response.clone()

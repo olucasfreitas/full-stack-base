@@ -1,4 +1,4 @@
-import type { Item } from '@entities/item/types'
+import type { Item } from '@items/types'
 
 type ItemListCardProps = {
   item: Item

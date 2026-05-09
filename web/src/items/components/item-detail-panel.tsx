@@ -1,5 +1,5 @@
-import { StatusBanner } from '@components/atoms/feedback/status-banner'
-import type { Item, ItemDraft } from '@entities/item/types'
+import type { Item, ItemDraft } from '@items/types'
+import { StatusBanner } from '@lib/ui/status-banner'
 
 type ItemDetailPanelProps = {
   item: Item | null

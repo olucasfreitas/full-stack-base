@@ -1,4 +1,18 @@
-import { ApiError } from './client'
+export class ApiError extends Error {
+  response: Response
+  body: { message?: string | string[] } | null
+
+  constructor(
+    response: Response,
+    body: { message?: string | string[] } | null,
+    cause?: unknown,
+  ) {
+    super(`${response.status} ${response.statusText}`, { cause })
+    this.name = 'ApiError'
+    this.response = response
+    this.body = body
+  }
+}
 
 function getApiMessage(body: { message?: string | string[] } | null) {
   if (Array.isArray(body?.message)) {

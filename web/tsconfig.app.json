@@ -6,12 +6,9 @@
     "module": "esnext",
     "paths": {
       "@app/*": ["./src/app/*"],
-      "@components/*": ["./src/components/*"],
-      "@entities/*": ["./src/entities/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@routes/*": ["./src/routes/*"],
-      "@shared/*": ["./src/shared/*"],
-      "@test/*": ["./src/test/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@items/*": ["./src/items/*"],
+      "@lib/*": ["./src/lib/*"],
       "@router": ["./src/router.tsx"]
     },
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],

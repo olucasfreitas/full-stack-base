@@ -17,12 +17,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
-      '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
-      '@entities': fileURLToPath(new URL('./src/entities', import.meta.url)),
-      '@pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
-      '@routes': fileURLToPath(new URL('./src/routes', import.meta.url)),
-      '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
-      '@test': fileURLToPath(new URL('./src/test', import.meta.url)),
+      '@hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
+      '@items': fileURLToPath(new URL('./src/items', import.meta.url)),
+      '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
       '@router': fileURLToPath(new URL('./src/router.tsx', import.meta.url)),
     },
   },

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
-import { StatusBanner } from '@components/atoms/feedback/status-banner'
-import { Panel } from '@components/atoms/layout/panel'
+import { Panel } from '@lib/ui/panel'
+import { StatusBanner } from '@lib/ui/status-banner'
 
 type ItemsPageTemplateProps = {
   createPanel: ReactNode

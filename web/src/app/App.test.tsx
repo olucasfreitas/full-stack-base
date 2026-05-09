@@ -2,11 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createMemoryHistory } from '@tanstack/react-router'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 
-import { getItem, listItems, patchItem, replaceItem } from '@entities/item/api'
+import { getItem, listItems, patchItem, replaceItem } from '@items/api'
+import { ApiError } from '@lib/http/client'
 import { createAppRouter } from '@router'
-import { ApiError } from '@shared/api/client'
 
-vi.mock('@entities/item/api', () => ({
+vi.mock('@items/api', () => ({
   listItems: vi.fn().mockResolvedValue([]),
   getItem: vi.fn(),
   createItem: vi.fn(),
