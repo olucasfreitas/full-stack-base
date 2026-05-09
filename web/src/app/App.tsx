@@ -1,6 +1,6 @@
-import { ItemsDashboard } from './features/items/components/items-dashboard'
+import { Outlet } from '@tanstack/react-router'
 
-function App() {
+export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-10 lg:px-8">
@@ -20,10 +20,8 @@ function App() {
           </div>
         </header>
 
-        <ItemsDashboard />
+        <Outlet />
       </main>
     </div>
   )
 }
-
-export default App

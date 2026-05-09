@@ -1,7 +1,9 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
+import { configureApp } from '../configure-app';
 import type { ItemRecord, NewItemRecord, UpdateItemRecord } from './item.types';
 import { ItemsController } from './items.controller';
 import { ITEMS_REPOSITORY, type ItemsRepository } from './items.repository';
@@ -87,18 +89,24 @@ describe('Items HTTP', () => {
           provide: ITEMS_REPOSITORY,
           useClass: InMemoryItemsRepository,
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: jest.fn((key: string) => {
+              if (key === 'CORS_ORIGIN') {
+                return 'http://localhost:5173';
+              }
+
+              throw new Error(`Unexpected key: ${key}`);
+            }),
+          },
+        },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api');
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-      }),
-    );
+    app.useLogger(false);
+    configureApp(app);
     await app.init();
   });
 

@@ -4,7 +4,7 @@ A clean starter workspace with a React frontend, a NestJS API, and a Drizzle-bac
 
 ## Stack
 
-- `web`: Vite, React, TypeScript, Tailwind CSS, `ky`
+- `web`: Vite, React, TypeScript, Tailwind CSS, TanStack Router, TanStack Query, `ky`
 - `api`: NestJS, TypeScript, Drizzle ORM, MySQL
 - Tooling: `pnpm` workspace, Docker Compose devcontainer, GitHub Codespaces support
 
@@ -102,6 +102,7 @@ See `web/.env.example`:
 - `VITE_API_BASE_URL`
 
 The frontend defaults to a relative `/api` base path and Vite proxies that path to the Nest API in development.
+TanStack Router owns client-side navigation under `web/src/routes`, and TanStack Query owns server-state loading and mutations.
 
 ## Scripts
 
@@ -111,7 +112,7 @@ From the repository root:
 - `pnpm dev:web`: run only the Vite frontend
 - `pnpm dev:api`: run only the Nest API
 - `pnpm build`: build both projects
-- `pnpm test`: run the workspace unit tests plus the API e2e health check
+- `pnpm test`: run the workspace unit and integration tests
 - `pnpm typecheck`: run TypeScript checks across the workspace
 - `pnpm db:generate`: generate a new Drizzle migration
 - `pnpm db:migrate`: apply existing Drizzle migrations
@@ -129,12 +130,13 @@ From the repository root:
 
 ## What the sample app demonstrates
 
-- the web app lists all items through `GET /api/items`
-- selecting an item loads `GET /api/items/:id`
-- the create form sends `POST /api/items`
+- `/` redirects to `/items`
+- `/items` preloads the collection through a route loader backed by TanStack Query
+- `/items/:id` preloads the selected record through a typed detail route loader
+- the create form sends `POST /api/items` and navigates to the new detail route
 - the detail editor sends `PUT /api/items/:id`
 - the toggle action sends `PATCH /api/items/:id`
-- the delete action sends `DELETE /api/items/:id`
+- the delete action sends `DELETE /api/items/:id` and returns to `/items`
 
 ## Database workflow
 
