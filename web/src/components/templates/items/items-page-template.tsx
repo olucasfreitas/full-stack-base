@@ -16,13 +16,9 @@ export function ItemsPageTemplate({
   detailPanel,
   errorMessage,
 }: ItemsPageTemplateProps) {
-  const contentClassName = detailPanel
-    ? 'mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.95fr)] lg:items-start'
-    : 'mt-6 space-y-4'
-
   return (
-    <section className="w-full space-y-6">
-      {createPanel}
+    <section className="grid w-full gap-6 lg:grid-cols-[minmax(340px,1fr)_minmax(0,1.5fr)]">
+      <div>{createPanel}</div>
 
       <Panel as="section">
         <div className="space-y-2">
@@ -35,7 +31,7 @@ export function ItemsPageTemplate({
 
         {errorMessage ? <StatusBanner tone="error" message={errorMessage} /> : null}
 
-        <div className={contentClassName}>
+        <div className="mt-6 space-y-4">
           {collectionPanel}
           {detailPanel ? detailPanel : null}
         </div>

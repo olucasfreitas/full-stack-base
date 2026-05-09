@@ -69,9 +69,10 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
 
       return replaceItem(parsedItemId, payload)
     },
-    onSuccess: (updatedItem) => {
-      setEditDraft(toItemDraft(updatedItem))
+    onSuccess: async (updatedItem) => {
       updateTaskCaches(updatedItem)
+      await navigate({ to: '/items' })
+
       showToast({
         message: `Saved "${updatedItem.title}".`,
       })

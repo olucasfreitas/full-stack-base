@@ -111,6 +111,11 @@ describe('App routing', () => {
       expect(patchItem).toHaveBeenCalledWith(1, { title: 'Pay utilities' })
     })
     expect(replaceItem).not.toHaveBeenCalled()
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/items')
+    })
+    expect(screen.queryByRole('region', { name: /edit task/i })).not.toBeInTheDocument()
   })
 
   it('keeps the selected task editor open when the same task is clicked again', async () => {
