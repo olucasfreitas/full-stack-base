@@ -12,8 +12,10 @@ import {
   itemDetailQueryOptions,
   itemsListQueryKey,
   parseItemId,
+  removeItemFromList,
+  upsertItemInList,
 } from '@entities/item/queries'
-import type { ItemDraft } from '@entities/item/types'
+import type { Item, ItemDraft } from '@entities/item/types'
 import { getErrorMessage } from '@shared/api/get-error-message'
 
 type ItemDetailPageProps = {
@@ -29,45 +31,50 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
 
   const parsedItemId = parseItemId(itemId)
 
+  function updateTaskCaches(updatedItem: Awaited<ReturnType<typeof replaceItem>>) {
+    queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
+    queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+      upsertItemInList(currentItems, updatedItem),
+    )
+  }
+
   const replaceMutation = useMutation({
     mutationFn: (payload: ItemDraft) => replaceItem(parsedItemId, payload),
-    onSuccess: async (updatedItem) => {
+    onSuccess: (updatedItem) => {
       setEditDraft(toItemDraft(updatedItem))
-      queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
-
-      await queryClient.invalidateQueries({
-        queryKey: itemsListQueryKey,
-      })
-      await queryClient.invalidateQueries({
-        queryKey: itemDetailQueryKey(itemId),
-      })
-
+      updateTaskCaches(updatedItem)
       showToast({
-        message: `Replaced item #${updatedItem.id} with PUT.`,
+        message: `Saved all changes to "${updatedItem.title}".`,
       })
     },
   })
 
-  const patchMutation = useMutation({
-    mutationFn: () =>
-      patchItem(parsedItemId, {
-        completed: !item.completed,
-      }),
-    onSuccess: async (updatedItem) => {
-      setEditDraft(toItemDraft(updatedItem))
-      queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
-
-      await queryClient.invalidateQueries({
-        queryKey: itemsListQueryKey,
-      })
-      await queryClient.invalidateQueries({
-        queryKey: itemDetailQueryKey(itemId),
-      })
+  const patchTitleMutation = useMutation({
+    mutationFn: (title: string) => patchItem(parsedItemId, { title }),
+    onSuccess: (updatedItem) => {
+      updateTaskCaches(updatedItem)
+      setEditDraft((currentDraft) => ({
+        ...currentDraft,
+        title: updatedItem.title,
+      }))
 
       showToast({
-        message: updatedItem.completed
-          ? `Patched item #${updatedItem.id} to completed.`
-          : `Patched item #${updatedItem.id} to pending.`,
+        message: 'Updated the task title.',
+      })
+    },
+  })
+
+  const patchDescriptionMutation = useMutation({
+    mutationFn: (description: string) => patchItem(parsedItemId, { description }),
+    onSuccess: (updatedItem) => {
+      updateTaskCaches(updatedItem)
+      setEditDraft((currentDraft) => ({
+        ...currentDraft,
+        description: updatedItem.description ?? '',
+      }))
+
+      showToast({
+        message: 'Updated the task description.',
       })
     },
   })
@@ -75,26 +82,31 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const deleteMutation = useMutation({
     mutationFn: () => removeItem(parsedItemId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: itemsListQueryKey,
-      })
+      queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+        removeItemFromList(currentItems, parsedItemId),
+      )
       queryClient.removeQueries({
         queryKey: itemDetailQueryKey(itemId),
       })
       await navigate({ to: '/items' })
 
       showToast({
-        message: `Deleted item #${parsedItemId}.`,
+        message: 'Deleted the task.',
       })
     },
   })
 
   const isSubmitting =
-    replaceMutation.isPending || patchMutation.isPending || deleteMutation.isPending
+    replaceMutation.isPending ||
+    patchTitleMutation.isPending ||
+    patchDescriptionMutation.isPending ||
+    deleteMutation.isPending
   const errorMessage = replaceMutation.error
     ? getErrorMessage(replaceMutation.error)
-    : patchMutation.error
-      ? getErrorMessage(patchMutation.error)
+    : patchTitleMutation.error
+      ? getErrorMessage(patchTitleMutation.error)
+      : patchDescriptionMutation.error
+        ? getErrorMessage(patchDescriptionMutation.error)
       : deleteMutation.error
         ? getErrorMessage(deleteMutation.error)
         : null
@@ -107,17 +119,20 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       isLoading={false}
       errorMessage={errorMessage}
       onChange={setEditDraft}
+      onSaveTitle={() => {
+        patchTitleMutation.mutate(editDraft.title)
+      }}
+      onSaveDescription={() => {
+        patchDescriptionMutation.mutate(editDraft.description)
+      }}
       onSubmit={() => {
-        void replaceMutation.mutateAsync(editDraft)
+        replaceMutation.mutate(editDraft)
       }}
       onReset={() => {
         setEditDraft(toItemDraft(item))
       }}
-      onToggleCompletion={() => {
-        void patchMutation.mutateAsync()
-      }}
       onDelete={() => {
-        void deleteMutation.mutateAsync()
+        deleteMutation.mutate()
       }}
     />
   )

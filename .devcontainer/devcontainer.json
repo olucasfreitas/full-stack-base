@@ -15,7 +15,6 @@
     }
   },
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
-  "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
   "customizations": {
     "vscode": {
       "extensions": [

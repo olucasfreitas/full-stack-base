@@ -74,7 +74,7 @@ export class ItemsService {
     payload: CreateItemDto | ReplaceItemDto,
   ): NewItemRecord {
     return {
-      title: payload.title.trim(),
+      title: payload.title,
       description: normalizeDescription(payload.description),
       completed: payload.completed ?? false,
     };
@@ -82,7 +82,7 @@ export class ItemsService {
 
   private toUpdateItemRecord(payload: PatchItemDto): UpdateItemRecord {
     return {
-      ...(payload.title !== undefined ? { title: payload.title.trim() } : {}),
+      ...(payload.title !== undefined ? { title: payload.title } : {}),
       ...(payload.description !== undefined
         ? { description: normalizeDescription(payload.description) }
         : {}),

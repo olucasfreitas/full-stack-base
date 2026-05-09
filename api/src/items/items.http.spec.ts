@@ -172,4 +172,16 @@ describe('Items HTTP', () => {
 
     await request(app.getHttpServer()).get('/api/items/1').expect(404);
   });
+
+  it('returns the standard validation message array for an empty title', async () => {
+    await request(app.getHttpServer())
+      .post('/api/items')
+      .send({
+        title: '   ',
+      })
+      .expect(400)
+      .expect(({ body }) => {
+        expect(body.message).toEqual(['Title is required.']);
+      });
+  });
 });

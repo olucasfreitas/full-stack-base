@@ -1,29 +1,21 @@
 import { Transform } from 'class-transformer';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 const trimString = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
 export class CreateItemDto {
   @Transform(trimString)
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
+  @IsString({ message: 'Title must be text.' })
+  @IsNotEmpty({ message: 'Title is required.' })
   title!: string;
 
   @Transform(trimString)
   @IsOptional()
-  @IsString()
-  @MaxLength(2000)
+  @IsString({ message: 'Description must be text.' })
   description?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: 'Completed must be true or false.' })
   completed?: boolean;
 }

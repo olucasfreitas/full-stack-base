@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { ApiError } from '@shared/api/client'
+import type { Item } from './types'
 
 import { getItem, listItems } from './api'
 
@@ -32,16 +32,19 @@ export function itemDetailQueryOptions(itemId: string) {
     queryKey: itemDetailQueryKey(itemId),
     queryFn: async () => {
       const parsedId = parseItemId(itemId)
-
-      try {
-        return await getItem(parsedId)
-      } catch (error) {
-        if (error instanceof ApiError && error.response.status === 404) {
-          throw new Error(`Item #${parsedId} was not found.`, { cause: error })
-        }
-
-        throw error
-      }
+      return getItem(parsedId)
     },
   })
+}
+
+export function upsertItemInList(
+  items: Item[] | undefined,
+  updatedItem: Item,
+) {
+  const nextItems = items ?? []
+  return [updatedItem, ...nextItems.filter((item) => item.id !== updatedItem.id)]
+}
+
+export function removeItemFromList(items: Item[] | undefined, itemId: number) {
+  return (items ?? []).filter((item) => item.id !== itemId)
 }

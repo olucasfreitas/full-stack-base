@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { ItemCollectionPanel } from '@components/organisms/items/item-collection-panel'
 import { ItemCreatePanel } from '@components/organisms/items/item-create-panel'
-import { ItemDetailPanel } from '@components/organisms/items/item-detail-panel'
 import { ItemsPageTemplate } from '@components/templates/items/items-page-template'
 import { emptyItemDraft } from '@entities/item/draft'
 import { itemsListQueryOptions } from '@entities/item/queries'
@@ -29,25 +28,12 @@ function ItemsRoutePending() {
           items={[]}
           selectedItemId={null}
           isLoading={true}
+          onToggleCompletion={noop}
           onSelect={noop}
         />
       }
-      detailPanel={
-        <ItemDetailPanel
-          item={null}
-          values={emptyItemDraft}
-          busy={false}
-          isLoading={true}
-          onChange={noopDraftChange}
-          onSubmit={noop}
-          onReset={noop}
-          onToggleCompletion={noop}
-          onDelete={noop}
-        />
-      }
-      isRefreshing={true}
+      detailPanel={null}
       errorMessage={null}
-      onRefresh={noop}
     />
   )
 }

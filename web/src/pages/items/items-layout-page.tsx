@@ -7,14 +7,15 @@ import { useToast } from '@app/use-toast'
 import { ItemCollectionPanel } from '@components/organisms/items/item-collection-panel'
 import { ItemCreatePanel } from '@components/organisms/items/item-create-panel'
 import { ItemsPageTemplate } from '@components/templates/items/items-page-template'
-import { createItem } from '@entities/item/api'
+import { createItem, patchItem } from '@entities/item/api'
 import { emptyItemDraft } from '@entities/item/draft'
 import {
-  itemDetailQueryOptions,
+  itemDetailQueryKey,
   itemsListQueryKey,
   itemsListQueryOptions,
+  upsertItemInList,
 } from '@entities/item/queries'
-import type { ItemDraft } from '@entities/item/types'
+import type { Item, ItemDraft } from '@entities/item/types'
 import { getErrorMessage } from '@shared/api/get-error-message'
 
 function getSelectedItemId(itemId: string | undefined) {
@@ -29,48 +30,47 @@ export function ItemsLayoutPage() {
   const { showToast } = useToast()
   const { itemId } = useParams({ strict: false })
   const [createDraft, setCreateDraft] = useState<ItemDraft>(emptyItemDraft)
+  const selectedItemId = getSelectedItemId(itemId)
 
   const itemsQuery = useSuspenseQuery(itemsListQueryOptions())
 
   const createMutation = useMutation({
     mutationFn: createItem,
-    onSuccess: async (createdItem) => {
+    onSuccess: (createdItem) => {
       setCreateDraft(emptyItemDraft)
-
-      await queryClient.invalidateQueries({
-        queryKey: itemsListQueryKey,
-      })
-      await queryClient.ensureQueryData(
-        itemDetailQueryOptions(String(createdItem.id)),
+      queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+        upsertItemInList(currentItems, createdItem),
       )
-      await navigate({
-        to: '/items/$itemId',
-        params: { itemId: String(createdItem.id) },
-      })
-
       showToast({
-        message: `Created item #${createdItem.id}.`,
+        message: `Added "${createdItem.title}".`,
       })
     },
   })
 
-  async function handleRefresh() {
-    await itemsQuery.refetch().catch(() => undefined)
-  }
+  const toggleCompletionMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: number; completed: boolean }) =>
+      patchItem(id, { completed }),
+    onSuccess: (updatedItem) => {
+      queryClient.setQueryData<Item[] | undefined>(itemsListQueryKey, (currentItems) =>
+        upsertItemInList(currentItems, updatedItem),
+      )
+      queryClient.setQueryData(
+        itemDetailQueryKey(String(updatedItem.id)),
+        updatedItem,
+      )
 
-  async function handleCreateItem() {
-    await createMutation.mutateAsync(createDraft)
-  }
-
-  async function handleSelectItem(nextItemId: number) {
-    await navigate({
-      to: '/items/$itemId',
-      params: { itemId: String(nextItemId) },
-    })
-  }
+      showToast({
+        message: updatedItem.completed
+          ? `Marked "${updatedItem.title}" as completed.`
+          : `Marked "${updatedItem.title}" as pending.`,
+      })
+    },
+  })
 
   const errorMessage = createMutation.error
     ? getErrorMessage(createMutation.error)
+    : toggleCompletionMutation.error
+      ? getErrorMessage(toggleCompletionMutation.error)
     : itemsQuery.error
       ? getErrorMessage(itemsQuery.error)
       : null
@@ -83,7 +83,7 @@ export function ItemsLayoutPage() {
           busy={createMutation.isPending}
           onChange={setCreateDraft}
           onSubmit={() => {
-            void handleCreateItem()
+            createMutation.mutate(createDraft)
           }}
           onReset={() => {
             setCreateDraft(emptyItemDraft)
@@ -93,19 +93,34 @@ export function ItemsLayoutPage() {
       collectionPanel={
         <ItemCollectionPanel
           items={itemsQuery.data}
-          selectedItemId={getSelectedItemId(itemId)}
-          isLoading={itemsQuery.isFetching && itemsQuery.isPending}
+          selectedItemId={selectedItemId}
+          isLoading={itemsQuery.isFetching && !itemsQuery.data.length}
+          busyItemId={
+            toggleCompletionMutation.isPending
+              ? (toggleCompletionMutation.variables?.id ?? null)
+              : null
+          }
           onSelect={(nextItemId) => {
-            void handleSelectItem(nextItemId)
+            if (selectedItemId === nextItemId) {
+              void navigate({ to: '/items' })
+              return
+            }
+
+            void navigate({
+              to: '/items/$itemId',
+              params: { itemId: String(nextItemId) },
+            })
+          }}
+          onToggleCompletion={(item) => {
+            toggleCompletionMutation.mutate({
+              id: item.id,
+              completed: !item.completed,
+            })
           }}
         />
       }
       detailPanel={<Outlet />}
-      isRefreshing={itemsQuery.isFetching}
       errorMessage={errorMessage}
-      onRefresh={() => {
-        void handleRefresh()
-      }}
     />
   )
 }

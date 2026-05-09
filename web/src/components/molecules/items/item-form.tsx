@@ -5,6 +5,10 @@ type ItemFormProps = {
   title: string
   description?: string
   submitLabel: string
+  titleLabel?: string
+  descriptionLabel?: string
+  showCompletedField?: boolean
+  completedLabel?: string
   values: ItemDraft
   busy?: boolean
   onChange: (next: ItemDraft) => void
@@ -17,6 +21,10 @@ export function ItemForm({
   title,
   description,
   submitLabel,
+  titleLabel = 'Title',
+  descriptionLabel = 'Description',
+  showCompletedField = true,
+  completedLabel = 'Mark task as completed',
   values,
   busy = false,
   onChange,
@@ -38,7 +46,7 @@ export function ItemForm({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-200" htmlFor={`${idPrefix}-title`}>
-          Title
+          {titleLabel}
         </label>
         <input
           id={`${idPrefix}-title`}
@@ -51,7 +59,7 @@ export function ItemForm({
             })
           }
           className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-          placeholder="Ship Codespaces-ready starter"
+          placeholder="Pay rent"
         />
       </div>
 
@@ -60,7 +68,7 @@ export function ItemForm({
           className="text-sm font-medium text-slate-200"
           htmlFor={`${idPrefix}-description`}
         >
-          Description
+          {descriptionLabel}
         </label>
         <textarea
           id={`${idPrefix}-description`}
@@ -72,24 +80,26 @@ export function ItemForm({
             })
           }
           className="min-h-28 w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-          placeholder="Describe the work tracked by this sample item."
+          placeholder="Add a note if you need one."
         />
       </div>
 
-      <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-200">
-        <input
-          type="checkbox"
-          checked={values.completed}
-          onChange={(event) =>
-            onChange({
-              ...values,
-              completed: event.target.checked,
-            })
-          }
-          className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
-        />
-        Start with this item marked as completed
-      </label>
+      {showCompletedField ? (
+        <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-200">
+          <input
+            type="checkbox"
+            checked={values.completed}
+            onChange={(event) =>
+              onChange({
+                ...values,
+                completed: event.target.checked,
+              })
+            }
+            className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
+          />
+          {completedLabel}
+        </label>
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <button

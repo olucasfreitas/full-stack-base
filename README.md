@@ -22,7 +22,7 @@ A clean starter workspace with a React frontend, a NestJS API, and a Drizzle-bac
 ### GitHub Codespaces
 
 1. Open the repository in a Codespace.
-2. Wait for the devcontainer to finish `postCreateCommand` and `postStartCommand`.
+2. Wait for the devcontainer to finish `postCreateCommand`.
 3. Run:
 
    ```bash
@@ -38,7 +38,7 @@ The Codespace container already includes:
 - a MySQL client
 - a MySQL `8.4` service running as `db`
 
-The post-start script waits for MySQL and applies the current Drizzle migrations automatically.
+The post-create setup installs dependencies and applies the current Drizzle migrations automatically.
 
 ### Local development
 
@@ -46,7 +46,6 @@ The post-start script waits for MySQL and applies the current Drizzle migrations
 
    ```bash
    corepack enable
-   corepack prepare pnpm@11.0.9 --activate
    ```
 
 2. Install dependencies:
@@ -81,7 +80,7 @@ The post-start script waits for MySQL and applies the current Drizzle migrations
    pnpm dev
    ```
 
-The database starts empty by design. Create records through the frontend to verify the full CRUD flow.
+The database starts empty by design. Create records through the frontend to verify the task flow.
 
 ## Environment variables
 
@@ -128,15 +127,19 @@ From the repository root:
 - `PATCH /api/items/:id`
 - `DELETE /api/items/:id`
 
+Validation errors use Nest's standard `400` response shape, including a `message`
+array when multiple constraints fail.
+
 ## What the sample app demonstrates
 
 - `/` redirects to `/items`
 - `/items` preloads the collection through a route loader backed by TanStack Query
 - `/items/:id` preloads the selected record through a typed detail route loader
-- the create form sends `POST /api/items` and navigates to the new detail route
-- the detail editor sends `PUT /api/items/:id`
-- the toggle action sends `PATCH /api/items/:id`
-- the delete action sends `DELETE /api/items/:id` and returns to `/items`
+- the create form sends `POST /api/items`
+- selecting a task loads `GET /api/items/:id`
+- single-field edits send `PATCH /api/items/:id`
+- full-task saves send `PUT /api/items/:id`
+- deleting a task sends `DELETE /api/items/:id` and returns to `/items`
 
 ## Database workflow
 

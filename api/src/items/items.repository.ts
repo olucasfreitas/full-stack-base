@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { desc, eq } from 'drizzle-orm';
 
 import { DatabaseService } from '../db/database.service';
@@ -45,7 +45,9 @@ export class DrizzleItemsRepository implements ItemsRepository {
     const item = await this.findById(inserted.id);
 
     if (!item) {
-      throw new Error('Created item could not be loaded.');
+      throw new InternalServerErrorException(
+        'The created item could not be loaded.',
+      );
     }
 
     return item;

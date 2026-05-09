@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import 'dotenv/config';
 
 import { migrate } from 'drizzle-orm/mysql2/migrator';
@@ -5,6 +7,8 @@ import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 
 import { validateEnv } from '../config/env';
+
+const migrationsFolder = path.resolve(__dirname, '../../drizzle');
 
 async function main() {
   const env = validateEnv(process.env);
@@ -14,7 +18,7 @@ async function main() {
   });
 
   await migrate(database, {
-    migrationsFolder: 'drizzle',
+    migrationsFolder,
   });
 
   await pool.end();

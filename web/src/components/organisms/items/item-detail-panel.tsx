@@ -1,6 +1,4 @@
 import { StatusBanner } from '@components/atoms/feedback/status-banner'
-import { ItemForm } from '@components/molecules/items/item-form'
-import { ItemMetaSummary } from '@components/molecules/items/item-meta-summary'
 import type { Item, ItemDraft } from '@entities/item/types'
 
 type ItemDetailPanelProps = {
@@ -10,9 +8,10 @@ type ItemDetailPanelProps = {
   isLoading: boolean
   errorMessage?: string | null
   onChange: (next: ItemDraft) => void
+  onSaveTitle: () => void
+  onSaveDescription: () => void
   onSubmit: () => void
   onReset: () => void
-  onToggleCompletion: () => void
   onDelete: () => void
 }
 
@@ -23,50 +22,116 @@ export function ItemDetailPanel({
   isLoading,
   errorMessage = null,
   onChange,
+  onSaveTitle,
+  onSaveDescription,
   onSubmit,
   onReset,
-  onToggleCompletion,
   onDelete,
 }: ItemDetailPanelProps) {
-  const selectedSummary = item
-    ? `Selected item #${item.id} was last updated at ${new Date(item.updatedAt).toLocaleString()}.`
-    : 'Choose an item to load the dedicated GET endpoint and enable the PUT, PATCH, and DELETE actions.'
-
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+    <section
+      aria-label="Edit task"
+      className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
+    >
       <div className="mb-4 space-y-2">
-        <h3 className="text-lg font-semibold text-white">Selected item</h3>
-        <p className="text-sm leading-6 text-slate-400">{selectedSummary}</p>
+        <h3 className="text-lg font-semibold text-white">Edit task</h3>
+        <p className="text-sm leading-6 text-slate-400">
+          Use PATCH for one field at a time, or save the whole task with PUT.
+        </p>
       </div>
 
       {errorMessage ? <StatusBanner tone="error" message={errorMessage} /> : null}
 
       {isLoading ? (
-        <p className="text-sm text-slate-400">Loading item details...</p>
+        <p className="text-sm text-slate-400">Loading task details...</p>
       ) : item ? (
         <div className="space-y-6">
-          <ItemMetaSummary item={item} />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-200" htmlFor="edit-task-title">
+              Task title
+            </label>
+            <input
+              id="edit-task-title"
+              value={values.title}
+              onChange={(event) =>
+                onChange({
+                  ...values,
+                  title: event.target.value,
+                })
+              }
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              placeholder="Pay rent"
+            />
+            <button
+              type="button"
+              onClick={onSaveTitle}
+              disabled={busy}
+              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Save title
+            </button>
+          </div>
 
-          <ItemForm
-            idPrefix="edit-item"
-            title="Replace the selected item"
-            description="Submitting this form sends a full PUT payload with the current title, description, and completed state."
-            submitLabel="Replace with PUT"
-            values={values}
-            busy={busy}
-            onChange={onChange}
-            onSubmit={onSubmit}
-            onReset={onReset}
-          />
+          <div className="space-y-2">
+            <label
+              className="text-sm font-medium text-slate-200"
+              htmlFor="edit-task-description"
+            >
+              Task description
+            </label>
+            <textarea
+              id="edit-task-description"
+              value={values.description}
+              onChange={(event) =>
+                onChange({
+                  ...values,
+                  description: event.target.value,
+                })
+              }
+              className="min-h-28 w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              placeholder="Add a note if you need one."
+            />
+            <button
+              type="button"
+              onClick={onSaveDescription}
+              disabled={busy}
+              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Save description
+            </button>
+          </div>
+
+          <label className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-200">
+            <input
+              type="checkbox"
+              checked={values.completed}
+              onChange={(event) =>
+                onChange({
+                  ...values,
+                  completed: event.target.checked,
+                })
+              }
+              className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-cyan-400 focus:ring-cyan-400"
+            />
+            Mark task as completed
+          </label>
 
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={onToggleCompletion}
+              onClick={onSubmit}
               disabled={busy}
               className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2.5 text-sm font-semibold text-cyan-200 transition hover:border-cyan-400 hover:bg-cyan-500/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {item.completed ? 'Mark pending with PATCH' : 'Mark completed with PATCH'}
+              Save all changes
+            </button>
+            <button
+              type="button"
+              onClick={onReset}
+              disabled={busy}
+              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Reset
             </button>
             <button
               type="button"
@@ -74,13 +139,13 @@ export function ItemDetailPanel({
               disabled={busy}
               className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Delete with DELETE
+              Delete task
             </button>
           </div>
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-700 px-4 py-8 text-sm leading-6 text-slate-400">
-          Select an item from the collection to load its dedicated detail route.
+          Select a task from the list to edit it.
         </div>
       )}
     </section>

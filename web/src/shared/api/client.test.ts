@@ -71,4 +71,24 @@ describe('requestJson', () => {
       'Title is required, Description is too long',
     )
   })
+
+  it('falls back to the HTTP status when the API error body is malformed JSON', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('not valid json', {
+          status: 502,
+          statusText: 'Bad Gateway',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+      ),
+    )
+
+    const error = await requestJson('items').catch((caughtError: unknown) => caughtError)
+
+    expect(error).toBeInstanceOf(ApiError)
+    expect(getErrorMessage(error)).toBe('502 Bad Gateway')
+  })
 })

@@ -57,7 +57,11 @@ async function parseJsonBody(response: Response) {
     return null
   }
 
-  return JSON.parse(text) as ApiErrorBody
+  try {
+    return JSON.parse(text) as ApiErrorBody
+  } catch {
+    return null
+  }
 }
 
 export async function requestJson<T>(path: string, init: RequestInit = {}) {
