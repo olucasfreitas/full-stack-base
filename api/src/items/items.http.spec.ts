@@ -173,6 +173,33 @@ describe('Items HTTP', () => {
     await request(app.getHttpServer()).get('/items/1').expect(404);
   });
 
+  it('returns the unchanged item when PATCH is sent with an empty payload', async () => {
+    await request(app.getHttpServer())
+      .post('/items')
+      .send({ title: 'Original title' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .patch('/items/1')
+      .send({})
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.title).toBe('Original title');
+      });
+  });
+
+  it('rejects unknown properties in the request body', async () => {
+    await request(app.getHttpServer())
+      .post('/items')
+      .send({ title: 'A task', unknown: 'field' })
+      .expect(400)
+      .expect(({ body }) => {
+        expect(body.message).toEqual(
+          expect.arrayContaining([expect.stringContaining('unknown')]),
+        );
+      });
+  });
+
   it('returns the standard validation message array for an empty title', async () => {
     await request(app.getHttpServer())
       .post('/items')

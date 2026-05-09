@@ -50,10 +50,13 @@ export class ItemsService {
   }
 
   async patch(id: number, payload: PatchItemDto) {
-    const item = await this.itemsRepository.patch(
-      id,
-      this.toUpdateItemRecord(payload),
-    );
+    const updateData = this.toUpdateItemRecord(payload);
+
+    if (Object.keys(updateData).length === 0) {
+      return this.findOne(id);
+    }
+
+    const item = await this.itemsRepository.patch(id, updateData);
 
     if (!item) {
       throw new NotFoundException(`Item ${id} was not found.`);

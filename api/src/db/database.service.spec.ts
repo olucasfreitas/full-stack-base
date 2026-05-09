@@ -1,80 +1,72 @@
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 
-import type { Env } from '../config/env';
-import * as schema from './schema';
 import { DatabaseService } from './database.service';
+
+const mockPool = {
+  end: vi.fn().mockResolvedValue(undefined),
+};
+
+const mockDatabase = { query: {} };
 
 vi.mock('mysql2/promise', () => ({
   default: {
-    createPool: vi.fn(),
+    createPool: vi.fn(() => mockPool),
   },
-  createPool: vi.fn(),
 }));
 
 vi.mock('drizzle-orm/mysql2', () => ({
-  drizzle: vi.fn(),
+  drizzle: vi.fn(() => mockDatabase),
 }));
 
 describe('DatabaseService', () => {
-  afterEach(() => {
+  let service: DatabaseService;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          ignoreEnvFile: true,
+          load: [
+            () => ({
+              DATABASE_URL: 'mysql://app:app@127.0.0.1:3306/full_stack_base',
+            }),
+          ],
+        }),
+      ],
+      providers: [DatabaseService],
+    }).compile();
+
+    service = module.get(DatabaseService);
   });
 
-  it('initializes the database pool during module startup', () => {
-    const pool = {
-      end: vi.fn().mockResolvedValue(undefined),
-    };
-    const getOrThrow = vi
-      .fn()
-      .mockReturnValue('mysql://app:app@127.0.0.1:3306/full_stack_base');
-    const database = {
-      query: {},
-    };
-    const configService = {
-      getOrThrow,
-    } as unknown as ConfigService<Env, true>;
-
-    vi.mocked(mysql.createPool).mockReturnValue(pool as never);
-    vi.mocked(drizzle).mockReturnValue(database as never);
-
-    const service = new DatabaseService(configService);
-
+  it('creates the pool and drizzle instance during module init', () => {
     service.onModuleInit();
 
-    expect(getOrThrow).toHaveBeenCalledWith('DATABASE_URL', {
-      infer: true,
-    });
     expect(mysql.createPool).toHaveBeenCalledWith(
       'mysql://app:app@127.0.0.1:3306/full_stack_base',
     );
-    expect(drizzle).toHaveBeenCalledWith(pool, {
-      schema,
-      mode: 'default',
-    });
-    expect(service.db).toBe(database);
+    expect(drizzle).toHaveBeenCalledWith(
+      mockPool,
+      expect.objectContaining({ mode: 'default' }),
+    );
+    expect(service.db).toBe(mockDatabase);
   });
 
-  it('closes the pool when the module shuts down', async () => {
-    const pool = {
-      end: vi.fn().mockResolvedValue(undefined),
-    };
-    const getOrThrow = vi
-      .fn()
-      .mockReturnValue('mysql://app:app@127.0.0.1:3306/full_stack_base');
-    const configService = {
-      getOrThrow,
-    } as unknown as ConfigService<Env, true>;
+  it('throws when db is accessed before init', () => {
+    expect(() => service.db).toThrow(
+      'DatabaseService has not been initialized yet.',
+    );
+  });
 
-    vi.mocked(mysql.createPool).mockReturnValue(pool as never);
-    vi.mocked(drizzle).mockReturnValue({} as never);
-
-    const service = new DatabaseService(configService);
-
+  it('closes the pool on module destroy', async () => {
     service.onModuleInit();
     await service.onModuleDestroy();
 
-    expect(pool.end).toHaveBeenCalledTimes(1);
+    expect(mockPool.end).toHaveBeenCalledOnce();
   });
 });

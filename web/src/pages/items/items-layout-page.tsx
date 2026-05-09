@@ -71,8 +71,6 @@ export function ItemsLayoutPage() {
     ? getErrorMessage(createMutation.error)
     : toggleCompletionMutation.error
       ? getErrorMessage(toggleCompletionMutation.error)
-    : itemsQuery.error
-      ? getErrorMessage(itemsQuery.error)
       : null
 
   return (
