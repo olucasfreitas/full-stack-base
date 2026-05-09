@@ -1,3 +1,5 @@
+import { fileURLToPath, URL } from 'node:url'
+
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
@@ -12,6 +14,18 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  resolve: {
+    alias: {
+      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
+      '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
+      '@entities': fileURLToPath(new URL('./src/entities', import.meta.url)),
+      '@pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
+      '@routes': fileURLToPath(new URL('./src/routes', import.meta.url)),
+      '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
+      '@test': fileURLToPath(new URL('./src/test', import.meta.url)),
+      '@router': fileURLToPath(new URL('./src/router.tsx', import.meta.url)),
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

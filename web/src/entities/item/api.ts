@@ -1,26 +1,37 @@
-import { apiClient } from '../../shared/api/client'
+import { requestJson } from '@shared/api/client'
 import type { CreateItemInput, Item, PatchItemInput, ReplaceItemInput } from './types'
 
 export async function listItems() {
-  return apiClient.get('items').json<Item[]>()
+  return requestJson<Item[]>('items')
 }
 
 export async function getItem(id: number) {
-  return apiClient.get(`items/${id}`).json<Item>()
+  return requestJson<Item>(`items/${id}`)
 }
 
 export async function createItem(payload: CreateItemInput) {
-  return apiClient.post('items', { json: payload }).json<Item>()
+  return requestJson<Item>('items', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
 }
 
 export async function replaceItem(id: number, payload: ReplaceItemInput) {
-  return apiClient.put(`items/${id}`, { json: payload }).json<Item>()
+  return requestJson<Item>(`items/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
 }
 
 export async function patchItem(id: number, payload: PatchItemInput) {
-  return apiClient.patch(`items/${id}`, { json: payload }).json<Item>()
+  return requestJson<Item>(`items/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
 }
 
 export async function removeItem(id: number) {
-  await apiClient.delete(`items/${id}`)
+  await requestJson<void>(`items/${id}`, {
+    method: 'DELETE',
+  })
 }

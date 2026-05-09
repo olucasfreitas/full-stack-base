@@ -92,7 +92,7 @@ describe('Items HTTP', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn((key: string) => {
+            getOrThrow: vi.fn((key: string) => {
               if (key === 'CORS_ORIGIN') {
                 return 'http://localhost:5173';
               }

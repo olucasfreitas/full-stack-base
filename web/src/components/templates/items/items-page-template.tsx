@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
-import { StatusBanner } from '../../atoms/feedback/status-banner'
-import { Panel } from '../../atoms/layout/panel'
+import { StatusBanner } from '@components/atoms/feedback/status-banner'
+import { Panel } from '@components/atoms/layout/panel'
 
 type ItemsPageTemplateProps = {
   createPanel: ReactNode
@@ -9,7 +9,6 @@ type ItemsPageTemplateProps = {
   detailPanel: ReactNode
   isRefreshing: boolean
   errorMessage: string | null
-  statusMessage: string | null
   onRefresh: () => void
 }
 
@@ -19,7 +18,6 @@ export function ItemsPageTemplate({
   detailPanel,
   isRefreshing,
   errorMessage,
-  statusMessage,
   onRefresh,
 }: ItemsPageTemplateProps) {
   return (
@@ -47,7 +45,6 @@ export function ItemsPageTemplate({
         </div>
 
         {errorMessage ? <StatusBanner tone="error" message={errorMessage} /> : null}
-        {statusMessage ? <StatusBanner tone="success" message={statusMessage} /> : null}
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
           {collectionPanel}

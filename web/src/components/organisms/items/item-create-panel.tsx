@@ -1,6 +1,6 @@
-import type { ItemDraft } from '../../../entities/item/types'
-import { Panel } from '../../atoms/layout/panel'
-import { ItemForm } from '../../molecules/items/item-form'
+import { Panel } from '@components/atoms/layout/panel'
+import { ItemForm } from '@components/molecules/items/item-form'
+import type { ItemDraft } from '@entities/item/types'
 
 type ItemCreatePanelProps = {
   values: ItemDraft
@@ -38,7 +38,7 @@ export function ItemCreatePanel({
           <code className="rounded bg-slate-800 px-1.5 py-0.5 text-cyan-300">/api</code>{' '}
           path through a shared{' '}
           <code className="rounded bg-slate-800 px-1.5 py-0.5 text-cyan-300">ky</code>{' '}
-          client, and Vite proxies that traffic to Nest during development.
+          helper, and Vite proxies that traffic to Nest during development.
         </p>
       </div>
     </Panel>

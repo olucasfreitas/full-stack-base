@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
-import { HTTPError } from 'ky'
+
+import { ApiError } from '@shared/api/client'
 
 import { getItem, listItems } from './api'
 
@@ -35,7 +36,7 @@ export function itemDetailQueryOptions(itemId: string) {
       try {
         return await getItem(parsedId)
       } catch (error) {
-        if (error instanceof HTTPError && error.response.status === 404) {
+        if (error instanceof ApiError && error.response.status === 404) {
           throw new Error(`Item #${parsedId} was not found.`, { cause: error })
         }
 

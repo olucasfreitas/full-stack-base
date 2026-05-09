@@ -1,7 +1,7 @@
-import type { Item, ItemDraft } from '../../../entities/item/types'
-import { StatusBanner } from '../../atoms/feedback/status-banner'
-import { ItemForm } from '../../molecules/items/item-form'
-import { ItemMetaSummary } from '../../molecules/items/item-meta-summary'
+import { StatusBanner } from '@components/atoms/feedback/status-banner'
+import { ItemForm } from '@components/molecules/items/item-form'
+import { ItemMetaSummary } from '@components/molecules/items/item-meta-summary'
+import type { Item, ItemDraft } from '@entities/item/types'
 
 type ItemDetailPanelProps = {
   item: Item | null
@@ -9,7 +9,6 @@ type ItemDetailPanelProps = {
   busy: boolean
   isLoading: boolean
   errorMessage?: string | null
-  statusMessage?: string | null
   onChange: (next: ItemDraft) => void
   onSubmit: () => void
   onReset: () => void
@@ -23,7 +22,6 @@ export function ItemDetailPanel({
   busy,
   isLoading,
   errorMessage = null,
-  statusMessage = null,
   onChange,
   onSubmit,
   onReset,
@@ -42,7 +40,6 @@ export function ItemDetailPanel({
       </div>
 
       {errorMessage ? <StatusBanner tone="error" message={errorMessage} /> : null}
-      {statusMessage ? <StatusBanner tone="success" message={statusMessage} /> : null}
 
       {isLoading ? (
         <p className="text-sm text-slate-400">Loading item details...</p>

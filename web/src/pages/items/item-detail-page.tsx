@@ -3,17 +3,18 @@ import { useState } from 'react'
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { ItemDetailPanel } from '../../components/organisms/items/item-detail-panel'
-import { patchItem, removeItem, replaceItem } from '../../entities/item/api'
-import { toItemDraft } from '../../entities/item/draft'
+import { useToast } from '@app/use-toast'
+import { ItemDetailPanel } from '@components/organisms/items/item-detail-panel'
+import { patchItem, removeItem, replaceItem } from '@entities/item/api'
+import { toItemDraft } from '@entities/item/draft'
 import {
   itemDetailQueryKey,
   itemDetailQueryOptions,
   itemsListQueryKey,
   parseItemId,
-} from '../../entities/item/queries'
-import type { ItemDraft } from '../../entities/item/types'
-import { getErrorMessage } from '../../shared/api/get-error-message'
+} from '@entities/item/queries'
+import type { ItemDraft } from '@entities/item/types'
+import { getErrorMessage } from '@shared/api/get-error-message'
 
 type ItemDetailPageProps = {
   itemId: string
@@ -22,18 +23,15 @@ type ItemDetailPageProps = {
 export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const { data: item } = useSuspenseQuery(itemDetailQueryOptions(itemId))
   const [editDraft, setEditDraft] = useState<ItemDraft>(() => toItemDraft(item))
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   const parsedItemId = parseItemId(itemId)
 
   const replaceMutation = useMutation({
     mutationFn: (payload: ItemDraft) => replaceItem(parsedItemId, payload),
     onSuccess: async (updatedItem) => {
-      setErrorMessage(null)
-      setStatusMessage(`Replaced item #${updatedItem.id} with PUT.`)
       setEditDraft(toItemDraft(updatedItem))
       queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
 
@@ -43,10 +41,10 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       await queryClient.invalidateQueries({
         queryKey: itemDetailQueryKey(itemId),
       })
-    },
-    onError: async (error) => {
-      setStatusMessage(null)
-      setErrorMessage(await getErrorMessage(error))
+
+      showToast({
+        message: `Replaced item #${updatedItem.id} with PUT.`,
+      })
     },
   })
 
@@ -56,12 +54,6 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
         completed: !item.completed,
       }),
     onSuccess: async (updatedItem) => {
-      setErrorMessage(null)
-      setStatusMessage(
-        updatedItem.completed
-          ? `Patched item #${updatedItem.id} to completed.`
-          : `Patched item #${updatedItem.id} to pending.`,
-      )
       setEditDraft(toItemDraft(updatedItem))
       queryClient.setQueryData(itemDetailQueryKey(itemId), updatedItem)
 
@@ -71,10 +63,12 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       await queryClient.invalidateQueries({
         queryKey: itemDetailQueryKey(itemId),
       })
-    },
-    onError: async (error) => {
-      setStatusMessage(null)
-      setErrorMessage(await getErrorMessage(error))
+
+      showToast({
+        message: updatedItem.completed
+          ? `Patched item #${updatedItem.id} to completed.`
+          : `Patched item #${updatedItem.id} to pending.`,
+      })
     },
   })
 
@@ -88,15 +82,22 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
         queryKey: itemDetailQueryKey(itemId),
       })
       await navigate({ to: '/items' })
-    },
-    onError: async (error) => {
-      setStatusMessage(null)
-      setErrorMessage(await getErrorMessage(error))
+
+      showToast({
+        message: `Deleted item #${parsedItemId}.`,
+      })
     },
   })
 
   const isSubmitting =
     replaceMutation.isPending || patchMutation.isPending || deleteMutation.isPending
+  const errorMessage = replaceMutation.error
+    ? getErrorMessage(replaceMutation.error)
+    : patchMutation.error
+      ? getErrorMessage(patchMutation.error)
+      : deleteMutation.error
+        ? getErrorMessage(deleteMutation.error)
+        : null
 
   return (
     <ItemDetailPanel
@@ -105,7 +106,6 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       busy={isSubmitting}
       isLoading={false}
       errorMessage={errorMessage}
-      statusMessage={statusMessage}
       onChange={setEditDraft}
       onSubmit={() => {
         void replaceMutation.mutateAsync(editDraft)

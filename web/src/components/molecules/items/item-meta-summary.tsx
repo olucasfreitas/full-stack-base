@@ -1,5 +1,5 @@
-import type { Item } from '../../../entities/item/types'
-import { ItemStatusBadge } from '../../atoms/items/item-status-badge'
+import { ItemStatusBadge } from '@components/atoms/items/item-status-badge'
+import type { Item } from '@entities/item/types'
 
 type ItemMetaSummaryProps = {
   item: Item

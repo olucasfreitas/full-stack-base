@@ -1,5 +1,5 @@
-import { ItemDetailPanel } from '../../components/organisms/items/item-detail-panel'
-import { emptyItemDraft } from '../../entities/item/draft'
+import { ItemDetailPanel } from '@components/organisms/items/item-detail-panel'
+import { emptyItemDraft } from '@entities/item/draft'
 
 function noop() {}
 

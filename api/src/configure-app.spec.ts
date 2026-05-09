@@ -5,7 +5,7 @@ import { configureApp } from './configure-app';
 
 describe('configureApp', () => {
   it('applies the shared Nest bootstrap defaults', () => {
-    const getOrThrow = jest.fn((key: string) => {
+    const getOrThrow = vi.fn((key: string) => {
       if (key === 'CORS_ORIGIN') {
         return 'http://localhost:5173';
       }
@@ -14,13 +14,13 @@ describe('configureApp', () => {
     });
 
     const app = {
-      get: jest.fn().mockImplementation((token: unknown) => {
+      get: vi.fn().mockImplementation((token: unknown) => {
         expect(token).toBe(ConfigService);
         return { getOrThrow };
       }),
-      setGlobalPrefix: jest.fn(),
-      useGlobalPipes: jest.fn(),
-      enableCors: jest.fn(),
+      setGlobalPrefix: vi.fn(),
+      useGlobalPipes: vi.fn(),
+      enableCors: vi.fn(),
     };
 
     configureApp(app as never);

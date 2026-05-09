@@ -2,10 +2,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createMemoryHistory } from '@tanstack/react-router'
 import { render, screen, waitFor } from '@testing-library/react'
 
-import { listItems } from '../entities/item/api'
-import { createAppRouter } from '../router'
+import { listItems } from '@entities/item/api'
+import { createAppRouter } from '@router'
 
-vi.mock('../entities/item/api', () => ({
+vi.mock('@entities/item/api', () => ({
   listItems: vi.fn().mockResolvedValue([]),
   getItem: vi.fn(),
   createItem: vi.fn(),

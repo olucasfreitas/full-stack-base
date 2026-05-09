@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext } from '@tanstack/react-router'
 
-import App from '../app/App'
+import App from '@app/App'
 
 function RootNotFound() {
   return (

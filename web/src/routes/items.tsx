@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { ItemCollectionPanel } from '../components/organisms/items/item-collection-panel'
-import { ItemCreatePanel } from '../components/organisms/items/item-create-panel'
-import { ItemDetailPanel } from '../components/organisms/items/item-detail-panel'
-import { ItemsPageTemplate } from '../components/templates/items/items-page-template'
-import { emptyItemDraft } from '../entities/item/draft'
-import { itemsListQueryOptions } from '../entities/item/queries'
-import { ItemsLayoutPage } from '../pages/items/items-layout-page'
+import { ItemCollectionPanel } from '@components/organisms/items/item-collection-panel'
+import { ItemCreatePanel } from '@components/organisms/items/item-create-panel'
+import { ItemDetailPanel } from '@components/organisms/items/item-detail-panel'
+import { ItemsPageTemplate } from '@components/templates/items/items-page-template'
+import { emptyItemDraft } from '@entities/item/draft'
+import { itemsListQueryOptions } from '@entities/item/queries'
+import { ItemsLayoutPage } from '@pages/items/items-layout-page'
 
 function noop() {}
 
@@ -47,7 +47,6 @@ function ItemsRoutePending() {
       }
       isRefreshing={true}
       errorMessage={null}
-      statusMessage={null}
       onRefresh={noop}
     />
   )

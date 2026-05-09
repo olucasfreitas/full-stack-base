@@ -1,5 +1,5 @@
-import type { Item } from '../../../entities/item/types'
-import { ItemListCard } from '../../molecules/items/item-list-card'
+import { ItemListCard } from '@components/molecules/items/item-list-card'
+import type { Item } from '@entities/item/types'
 
 type ItemCollectionPanelProps = {
   items: Item[]

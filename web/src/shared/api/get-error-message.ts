@@ -1,17 +1,23 @@
-import { HTTPError } from 'ky'
+import { ApiError } from './client'
 
-export async function getErrorMessage(error: unknown) {
-  if (error instanceof HTTPError) {
-    const body = await error.response
-      .json<{ message?: string | string[] }>()
-      .catch(() => null)
+function getApiMessage(body: { message?: string | string[] } | null) {
+  if (Array.isArray(body?.message)) {
+    return body.message.join(', ')
+  }
 
-    if (Array.isArray(body?.message)) {
-      return body.message.join(', ')
-    }
+  if (typeof body?.message === 'string') {
+    return body.message
+  }
 
-    if (typeof body?.message === 'string') {
-      return body.message
+  return null
+}
+
+export function getErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    const message = getApiMessage(error.body)
+
+    if (message) {
+      return message
     }
 
     return `${error.response.status} ${error.response.statusText}`
