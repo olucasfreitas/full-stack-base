@@ -12,21 +12,21 @@ export async function getItem(id: number) {
 export async function createItem(payload: CreateItemInput) {
   return requestJson<Item>('items', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    json: payload,
   })
 }
 
 export async function replaceItem(id: number, payload: ReplaceItemInput) {
   return requestJson<Item>(`items/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(payload),
+    json: payload,
   })
 }
 
 export async function patchItem(id: number, payload: PatchItemInput) {
   return requestJson<Item>(`items/${id}`, {
     method: 'PATCH',
-    body: JSON.stringify(payload),
+    json: payload,
   })
 }
 

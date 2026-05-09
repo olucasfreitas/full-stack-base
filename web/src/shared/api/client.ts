@@ -1,4 +1,4 @@
-import ky, { TimeoutError } from 'ky'
+import ky, { TimeoutError, type Options } from 'ky'
 
 const apiBaseUrl = (() => {
   const value = import.meta.env.VITE_API_BASE_URL ?? '/api/'
@@ -64,7 +64,7 @@ async function parseJsonBody(response: Response) {
   }
 }
 
-export async function requestJson<T>(path: string, init: RequestInit = {}) {
+export async function requestJson<T>(path: string, init: Options = {}) {
   try {
     const response = await apiClient(path, {
       ...init,
