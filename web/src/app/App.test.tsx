@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 import { createAppRouter } from '@router'
 
 describe('App', () => {
-  it('renders the heading and health check button', async () => {
+  it('renders the heading and hello world text', async () => {
     const router = createAppRouter({
       history: createMemoryHistory({ initialEntries: ['/'] }),
     })
@@ -15,8 +15,6 @@ describe('App', () => {
       await screen.findByRole('heading', { name: /full stack base/i }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('button', { name: /check api health/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/hello, world/i)).toBeInTheDocument()
   })
 })
