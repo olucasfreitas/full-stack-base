@@ -17,8 +17,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
-      '@hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
-      '@items': fileURLToPath(new URL('./src/items', import.meta.url)),
       '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
       '@router': fileURLToPath(new URL('./src/router.tsx', import.meta.url)),
     },

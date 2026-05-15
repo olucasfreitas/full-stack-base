@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { validateEnv } from './config/env';
 import { AppController } from './app.controller';
-import { ItemsModule } from './items/items.module';
+import { DatabaseModule } from './db/database.module';
 import { LoggingMiddleware } from './logging.middleware';
 
 @Module({
@@ -13,10 +13,9 @@ import { LoggingMiddleware } from './logging.middleware';
       envFilePath: ['.env.local', '.env'],
       validate: (config) => validateEnv(config),
     }),
-    ItemsModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
-  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

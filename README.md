@@ -80,8 +80,6 @@ The post-create setup installs dependencies and applies the current Drizzle migr
    pnpm dev
    ```
 
-The database starts empty by design. Create records through the frontend to verify the task flow.
-
 ## Environment variables
 
 Root-level `.env.example` documents every variable used across the workspace.
@@ -100,9 +98,7 @@ See `web/.env.example`:
 
 - `VITE_API_BASE_URL`
 
-The Nest API serves bare routes like `/health` and `/items`.
-The frontend defaults to a relative `/api` base path in development, and Vite rewrites that proxy path to the bare Nest routes so it does not clash with the app's own `/items` route.
-TanStack Router owns client-side navigation under `web/src/routes`, and TanStack Query owns server-state loading and mutations.
+The Nest API serves bare routes (e.g. `/health`). The frontend defaults to a relative `/api` base path in development, and Vite rewrites that proxy path to the bare Nest routes.
 
 ## Scripts
 
@@ -121,26 +117,8 @@ From the repository root:
 ## API routes
 
 - `GET /health`
-- `GET /items`
-- `GET /items/:id`
-- `POST /items`
-- `PUT /items/:id`
-- `PATCH /items/:id`
-- `DELETE /items/:id`
 
-Validation errors use Nest's standard `400` response shape, including a `message`
-array when multiple constraints fail.
-
-## What the sample app demonstrates
-
-- `/` redirects to `/items`
-- `/items` preloads the collection through a route loader backed by TanStack Query
-- `/items/:id` preloads the selected record through a typed detail route loader
-- the create form sends `POST /items`
-- selecting a task loads `GET /items/:id`
-- one changed field saves with `PATCH /items/:id`
-- multiple changed fields save with `PUT /items/:id`
-- deleting a task sends `DELETE /items/:id` and returns to `/items`
+Add your own routes by creating new NestJS modules and registering them in `api/src/app.module.ts`.
 
 ## Database workflow
 

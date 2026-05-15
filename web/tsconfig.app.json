@@ -6,8 +6,6 @@
     "module": "esnext",
     "paths": {
       "@app/*": ["./src/app/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@items/*": ["./src/items/*"],
       "@lib/*": ["./src/lib/*"],
       "@router": ["./src/router.tsx"]
     },

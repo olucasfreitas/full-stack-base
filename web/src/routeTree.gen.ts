@@ -9,72 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ItemsRouteImport } from './routes/items'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ItemsIndexRouteImport } from './routes/items/index'
-import { Route as ItemsItemIdRouteImport } from './routes/items/$itemId'
 
-const ItemsRoute = ItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ItemsIndexRoute = ItemsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ItemsRoute,
-} as any)
-const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
-  id: '/$itemId',
-  path: '/$itemId',
-  getParentRoute: () => ItemsRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/items': typeof ItemsRouteWithChildren
-  '/items/$itemId': typeof ItemsItemIdRoute
-  '/items/': typeof ItemsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/items/$itemId': typeof ItemsItemIdRoute
-  '/items': typeof ItemsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/items': typeof ItemsRouteWithChildren
-  '/items/$itemId': typeof ItemsItemIdRoute
-  '/items/': typeof ItemsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/items' | '/items/$itemId' | '/items/'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/items/$itemId' | '/items'
-  id: '__root__' | '/' | '/items' | '/items/$itemId' | '/items/'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ItemsRoute: typeof ItemsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/items': {
-      id: '/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof ItemsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -82,38 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/items/': {
-      id: '/items/'
-      path: '/'
-      fullPath: '/items/'
-      preLoaderRoute: typeof ItemsIndexRouteImport
-      parentRoute: typeof ItemsRoute
-    }
-    '/items/$itemId': {
-      id: '/items/$itemId'
-      path: '/$itemId'
-      fullPath: '/items/$itemId'
-      preLoaderRoute: typeof ItemsItemIdRouteImport
-      parentRoute: typeof ItemsRoute
-    }
   }
 }
 
-interface ItemsRouteChildren {
-  ItemsItemIdRoute: typeof ItemsItemIdRoute
-  ItemsIndexRoute: typeof ItemsIndexRoute
-}
-
-const ItemsRouteChildren: ItemsRouteChildren = {
-  ItemsItemIdRoute: ItemsItemIdRoute,
-  ItemsIndexRoute: ItemsIndexRoute,
-}
-
-const ItemsRouteWithChildren = ItemsRoute._addFileChildren(ItemsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ItemsRoute: ItemsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
